@@ -1,36 +1,58 @@
 version: '3.8'
 
 services:
+  # Base de Datos: El corazón de la persistencia
   db:
     image: postgres:15-alpine
     container_name: sonora_engine_db
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USER:-admin}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
-      POSTGRES_DB: ${DB_NAME:-prospector_db}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - ./packages/db-schema/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-admin}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  api:
-    build:
-      context: ./apps/api
-      dockerfile: Dockerfile
-    container_name: sonora_api
-    depends_on:
-      - db
+  # Automatización: Motor n8n
+  n8n:
+    image: n8nio/n8n:latest-alpine
+    container_name: sonora_engine_n8n
+    restart: always
+    ports:
+      - "5678:5678"
     environment:
-      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-    volumes:
-      - ./apps/api:/app
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=db
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${DB_NAME}
+      - DB_POSTGRESDB_USER=${DB_USER}
+      - DB_POSTGRESDB_PASSWORD=${DB_PASSWORD}
+      - N8N_ENCRYPTION_KEY=${N8N_KEY:-supersecretkey123}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Dashboard: Next.js UI
+  dashboard:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: sonora_engine_ui
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:
