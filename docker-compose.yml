@@ -23,7 +23,7 @@ services:
 
   # Automatización: Motor n8n
   n8n:
-    image: n8nio/n8n:latest-alpine
+    image: n8nio/n8n:latest
     container_name: sonora_engine_n8n
     restart: always
     ports:
