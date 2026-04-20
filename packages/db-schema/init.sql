@@ -4,6 +4,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Tabla de Leads de Sonora
 CREATE TABLE IF NOT EXISTS leads (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    search_id UUID REFERENCES search_queries(id) ON DELETE SET NULL, -- Nueva relación para auditoría
     google_place_id VARCHAR(255) UNIQUE NOT NULL,
     business_name VARCHAR(255) NOT NULL,
     city VARCHAR(100) NOT NULL,
