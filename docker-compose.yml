@@ -35,7 +35,7 @@ services:
       - DB_POSTGRESDB_DATABASE=${PGDATABASE:-prospector_db}
       - DB_POSTGRESDB_USER=${PGUSER:-admin}
       - DB_POSTGRESDB_PASSWORD=${PGPASSWORD:-secret}
-      - N8N_ENCRYPTION_KEY=${N8N_KEY:-supersecretkey123}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
     depends_on:
       db:
         condition: service_healthy
