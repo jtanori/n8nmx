@@ -9,9 +9,16 @@ describe("LeadTable Component", () => {
   });
 
   it("renders lead data correctly", () => {
-    const leads = [{ id: "1", name: "John Doe", city: "Hermosillo" }];
-    render(<LeadTable leads={leads} />);
-    expect(screen.getByText("John Doe")).toBeInTheDocument();
+    const leads = [{ 
+        id: "1", 
+        business_name: "Negocio Test", 
+        city: "Hermosillo", 
+        is_high_quality: true, 
+        relevance_score: 90 
+    }];
+    render(<LeadTable leads={leads as any} />);
+    expect(screen.getByText("Negocio Test")).toBeInTheDocument();
     expect(screen.getByText("Hermosillo")).toBeInTheDocument();
+    expect(screen.getByText(/Alta Relevancia/i)).toBeInTheDocument();
   });
 });
