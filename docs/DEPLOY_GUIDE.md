@@ -58,4 +58,22 @@ Render es una excelente alternativa para desplegar servicios web y bases de dato
 - **Rama de despliegue:** Por defecto, estas plataformas suelen desplegar la rama `main`. Asegúrate de fusionar tus cambios de `develop` a `main` antes de realizar el despliegue.
 
 ---
-*Para soporte técnico adicional, revisa las guías oficiales de [Railway Docs](https://docs.railway.app/) y [Render Docs](https://render.com/docs).*
+
+## 3. Despliegue de n8n en el mismo proyecto de Railway
+Para mantener todo el ecosistema (Motor, DB y Automatización) unido:
+
+1. **Añadir Servicio:** En tu proyecto de Railway, haz clic en `+ New` -> `Deploy from image`.
+2. **Imagen:** Utiliza `n8nio/n8n:latest`.
+3. **Vincular Base de Datos:**
+   - Haz clic en el nuevo servicio de n8n -> `Variables`.
+   - Crea las siguientes variables usando las referencias de Railway (haciendo clic en "Reference"):
+     - `DB_TYPE`: `postgresdb`
+     - `DB_POSTGRESDB_HOST`: `${{Postgres.PGHOST}}`
+     - `DB_POSTGRESDB_PORT`: `${{Postgres.PGPORT}}`
+     - `DB_POSTGRESDB_DATABASE`: `${{Postgres.PGDATABASE}}`
+     - `DB_POSTGRESDB_USER`: `${{Postgres.PGUSER}}`
+     - `DB_POSTGRESDB_PASSWORD`: `${{Postgres.PGPASSWORD}}`
+     - `N8N_ENCRYPTION_KEY`: (Genera una clave única y segura).
+
+4. **Persistencia:** En la pestaña `Volumes` del servicio n8n, añade un volumen montado en `/home/node/.n8n` para asegurar que tus flujos no se pierdan al reiniciar el contenedor.
+
