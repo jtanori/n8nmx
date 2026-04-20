@@ -12,19 +12,8 @@ services:
       POSTGRES_DB: ${PGDATABASE:-prospector_db}
     ports:
       - "${DB_PORT:-5432}:5432"
-  migrator:
-    image: postgres:15-alpine
     volumes:
-      - ./packages/db-schema:/db-schema
-    environment:
-      - DATABASE_URL=postgresql://${PGUSER}:${PGPASSWORD}@db:5432/${PGDATABASE}
-    command: >
-      sh -c "apk add --no-cache postgresql-client && /db-schema/migrate.sh $$DATABASE_URL"
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - ./packages/db-schema/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./packages/db-schema/migrations:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-admin}"]
@@ -69,6 +58,7 @@ services:
       db:
         condition: service_healthy
 
+  # Migrador de esquemas
   migrator:
     image: postgres:15-alpine
     volumes:
@@ -80,5 +70,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
 volumes:
   postgres_data:
