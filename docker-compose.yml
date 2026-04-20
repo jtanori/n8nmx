@@ -7,16 +7,16 @@ services:
     container_name: sonora_engine_db
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${PGUSER:-admin}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-secret}
+      POSTGRES_DB: ${PGDATABASE:-prospector_db}
     ports:
-      - "${DB_PORT}:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - ./packages/db-schema/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-admin}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -32,9 +32,9 @@ services:
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=db
       - DB_POSTGRESDB_PORT=5432
-      - DB_POSTGRESDB_DATABASE=${DB_NAME}
-      - DB_POSTGRESDB_USER=${DB_USER}
-      - DB_POSTGRESDB_PASSWORD=${DB_PASSWORD}
+      - DB_POSTGRESDB_DATABASE=${PGDATABASE:-prospector_db}
+      - DB_POSTGRESDB_USER=${PGUSER:-admin}
+      - DB_POSTGRESDB_PASSWORD=${PGPASSWORD:-secret}
       - N8N_ENCRYPTION_KEY=${N8N_KEY:-supersecretkey123}
     depends_on:
       db:
@@ -49,7 +49,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - DATABASE_URL=postgresql://${PGUSER}:${PGPASSWORD}@db:5432/${PGDATABASE}
     depends_on:
       db:
         condition: service_healthy
