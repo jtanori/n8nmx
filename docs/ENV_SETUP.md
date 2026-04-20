@@ -17,12 +17,12 @@ Abre tu archivo `.env` recién creado y configura los siguientes parámetros:
 
 | Variable | Descripción | Valor Ejemplo |
 | :--- | :--- | :--- |
-| DB_USER | Usuario de PostgreSQL | `admin` |
-| DB_PASSWORD | Contraseña de PostgreSQL | `secret` |
-| DB_NAME | Nombre de la base de datos | `prospector_db` |
+| PGUSER | Usuario de PostgreSQL | `admin` |
+| PGPASSWORD | Contraseña de PostgreSQL | `secret` |
+| PGDATABASE | Nombre de la base de datos | `prospector_db` |
 | DATABASE_URL | URL de conexión completa | `postgresql://admin:secret@db:5432/prospector_db` |
 | DB_PORT | Puerto de la base de datos | `5432` |
-| DB_HOST | Host de la base de datos | `localhost` |
+| DB_HOST | Host de la base de datos | `db` |
 
 ## 3. Configuración por Entorno
 
