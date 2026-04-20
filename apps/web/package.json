@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "dotenv -e .env${APP_ENV:+.$APP_ENV} -- next dev",
+    "build": "dotenv -e .env${APP_ENV:+.$APP_ENV} -- next build",
+    "start": "dotenv -e .env${APP_ENV:+.$APP_ENV} -- next start",
     "lint": "next lint",
     "test": "jest --detectOpenHandles"
   },
@@ -42,6 +42,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "identity-obj-proxy": "^3.0.0",
