@@ -2,19 +2,20 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:17-alpine
-    container_name: sonora_db
+    image: postgres:15-alpine
+    container_name: sonora_engine_db
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASS:-secret}
+      POSTGRES_DB: ${DB_NAME:-prospector_db}
     ports:
       - "5432:5432"
     volumes:
+      - ./packages/db-schema/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-admin}"]
       interval: 5s
       timeout: 5s
       retries: 5
