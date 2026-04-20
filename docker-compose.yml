@@ -36,6 +36,10 @@ services:
       - DB_POSTGRESDB_USER=${PGUSER:-admin}
       - DB_POSTGRESDB_PASSWORD=${PGPASSWORD:-secret}
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - N8N_HOST=${N8N_HOST:-localhost}
+      - N8N_PORT=${N8N_PORT:-5678}
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
+      - WEBHOOK_URL=${N8N_WEBHOOK_URL}
     depends_on:
       db:
         condition: service_healthy
