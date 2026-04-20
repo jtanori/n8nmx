@@ -1,8 +1,24 @@
 'use server';
 
-import pool from '@/lib/db';
+import sql from '@/lib/db';
 
 export async function getLeads() {
-  const result = await pool.query('SELECT * FROM leads ORDER BY created_at DESC');
-  return result.rows;
+  try {
+    const leads = await sql`
+      SELECT 
+        id, 
+        business_name, 
+        city, 
+        relevance_score, 
+        is_high_quality, 
+        status 
+      FROM leads 
+      ORDER BY created_at DESC 
+      LIMIT 50
+    `;
+    return leads;
+  } catch (error) {
+    console.error('Database Error:', error);
+    return [];
+  }
 }
