@@ -11,11 +11,20 @@ fi
 echo "Verificando tabla de migraciones..."
 psql "$DB_URL" -c "CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
 
-for file in packages/db-schema/migrations/*.sql; do
-    # Extraer el número de versión (ej: 001_initial_schema.sql -> 1)
+# Iterar explícitamente solo sobre archivos que empiezan con dígitos
+for file in /db-schema/migrations/[0-9]*.sql; do
+    # Extraer el nombre del archivo
     filename=$(basename "$file")
+    
+    # Extraer el número de versión (ej: 001_initial_schema.sql -> 1)
     version=$(echo $filename | cut -d'_' -f1 | sed 's/^0*//')
     
+    # Validar que la versión sea un número
+    if ! [[ "$version" =~ ^[0-9]+$ ]]; then
+        echo "Saltando archivo inválido: $filename"
+        continue
+    fi
+
     echo "Verificando migración: $filename (v$version)..."
     
     applied=$(psql "$DB_URL" -tAc "SELECT 1 FROM schema_migrations WHERE version = $version")
