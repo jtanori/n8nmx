@@ -7,7 +7,8 @@ module.exports = {
   testEnvironment: "jest-environment-jsdom",
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
-    "\\.(css|less|sass|scss)$": "identity-obj-proxy"
+    "\\.(css|less|sass|scss)$": "identity-obj-proxy",
+    "\\.(jpg|jpeg|png|gif|svg)$": "<rootDir>/__mocks__/fileMock.js"
   },
   transform: {
     ...tsJestTransformCfg,

@@ -7,9 +7,23 @@ interface SearchQuery {
   priority_order: number;
 }
 
+export async function getLeads() {
+  try {
+    const leads = await sql`
+      SELECT id, business_name, city, relevance_score, is_high_quality, sales_suggestions 
+      FROM leads 
+      ORDER BY created_at DESC 
+      LIMIT 50
+    `;
+    return leads;
+  } catch (error) {
+    console.error('Database Error:', error);
+    return [];
+  }
+}
+
 export async function updateQueuePriority(queries: SearchQuery[]) {
   try {
-    // Usamos una transacción para asegurar que todas las actualizaciones se completen
     await sql.begin(async sql => {
       for (const query of queries) {
         await sql`
