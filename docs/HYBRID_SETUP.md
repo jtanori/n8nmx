@@ -1,29 +1,32 @@
-# Workflow Híbrido: Infraestructura Docker + App Local
+# Guía de Ejecución Local (Workflow Híbrido)
 
-Para evitar la sobrecarga del motor de Docker y acelerar el desarrollo, ejecutamos la infraestructura en contenedores y las aplicaciones en el host.
+Este proyecto utiliza un script orquestador para gestionar el entorno y los servicios de forma eficiente.
 
-## 1. Infraestructura (Docker)
-Levanta solo los servicios base:
+## 1. Script Orquestador (`scripts/init-dev.sh`)
+Este script realiza tres tareas automáticamente:
+1. Crea un enlace simbólico entre el archivo de entorno deseado (ej: `.env.remote`) y `apps/web/.env`.
+2. Inicia la API de FastAPI en background.
+3. Inicia el Dashboard de Next.js en foreground.
+
+## 2. Cómo ejecutar el sistema
+Ejecuta el script desde la raíz del proyecto:
+
+### Entorno Default (.env)
 ```bash
-docker compose up -d db n8n migrator
+./scripts/init-dev.sh
 ```
 
-## 2. API (Host)
-Ejecuta la API directamente en tu terminal:
+### Entorno Híbrido/Cloud (.env.remote)
+Para conectar tu dashboard local a la base de datos y n8n en Railway:
 ```bash
-cd apps/api
-source venv/bin/activate
-uvicorn src.main:app --reload --port 8000
+./scripts/init-dev.sh .env.remote
 ```
 
-## 3. Dashboard (Host)
-Ejecuta el frontend directamente:
-```bash
-cd apps/web
-APP_ENV=remote npm run dev
-```
+## 3. Ventajas de este flujo
+- **Consistencia:** Evita configuraciones duplicadas; una sola fuente de verdad (`.env`).
+- **Limpieza:** No ensucia el código con copias de archivos.
+- **Portabilidad:** Puedes crear nuevos perfiles de entorno (`.env.staging`, `.env.production`) y usarlos al instante con el mismo comando.
+- **Seguridad:** Los archivos `.env` generados por el enlace están en el `.gitignore`.
 
-## 4. Ventajas
-- **Hot Reload:** Los cambios en código se ven al instante.
-- **Eficiencia:** Ahorro masivo de RAM/CPU al no compilar contenedores innecesariamente.
-- **Depuración:** Puedes usar el debugger de tu editor directamente sobre el proceso.
+---
+*Para más detalles sobre los entornos, consulta `docs/ENV_SETUP.md`.*
