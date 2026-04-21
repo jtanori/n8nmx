@@ -1,37 +1,29 @@
-# Guía de Flujo Híbrido: Local-Cloud
+# Workflow Híbrido: Infraestructura Docker + App Local
 
-Esta configuración permite ejecutar el dashboard y la API localmente conectándolos a la infraestructura (Postgres, n8n) en la nube (Railway).
+Para evitar la sobrecarga del motor de Docker y acelerar el desarrollo, ejecutamos la infraestructura en contenedores y las aplicaciones en el host.
 
-## 1. Configuración de .env.remote
-Para usar la infraestructura en la nube, crea o edita el archivo `.env.remote` en la raíz del proyecto.
-
-> **Importante:** Nunca subas este archivo al repositorio. Úsalo como archivo de referencia `env.remote.example` si es necesario.
-
+## 1. Infraestructura (Docker)
+Levanta solo los servicios base:
 ```bash
-# Variables obtenidas del Dashboard de Railway
-PGUSER=...
-PGPASSWORD=...
-PGDATABASE=...
-DB_HOST=... # El host que te proporciona Railway
-DB_PORT=5432
-# ... etc
+docker compose up -d db n8n migrator
 ```
 
-## 2. Ejecución Híbrida
-Utiliza la variable de entorno `APP_ENV` para conmutar entre tu entorno local y el remoto:
-
-### Iniciar el Dashboard (Next.js)
+## 2. API (Host)
+Ejecuta la API directamente en tu terminal:
 ```bash
-APP_ENV=remote npm run dev --prefix apps/web
+cd apps/api
+source venv/bin/activate
+uvicorn src.main:app --reload --port 8000
 ```
 
-### Iniciar la API (FastAPI)
-Para la API, puedes cargar el entorno manualmente o ajustar el script de inicio:
+## 3. Dashboard (Host)
+Ejecuta el frontend directamente:
 ```bash
-dotenv -e .env.remote -- uvicorn apps/api/src/main:app --reload
+cd apps/web
+APP_ENV=remote npm run dev
 ```
 
-## 3. Ventajas
-- **Iteración Rápida:** Cambios en el código local reflejados instantáneamente sin desplegar.
-- **Persistencia en la Nube:** Los datos persisten en la base de datos de Railway.
-- **Automatización Activa:** El n8n en la nube sigue procesando datos aunque apagues tu máquina.
+## 4. Ventajas
+- **Hot Reload:** Los cambios en código se ven al instante.
+- **Eficiencia:** Ahorro masivo de RAM/CPU al no compilar contenedores innecesariamente.
+- **Depuración:** Puedes usar el debugger de tu editor directamente sobre el proceso.

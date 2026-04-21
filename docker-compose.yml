@@ -45,17 +45,32 @@ services:
         condition: service_healthy
 
   # Dashboard: Next.js UI
-  dashboard:
-    build:
-      context: ./apps/web
-      dockerfile: Dockerfile
-    container_name: sonora_engine_ui
-    ports:
-      - "3000:3000"
-    environment:
-      - DATABASE_URL=postgresql://${PGUSER}:${PGPASSWORD}@db:5432/${PGDATABASE}
-    depends_on:
-      db:
+  # dashboard:
+  #   build:
+  #     context: ./apps/web
+  #     dockerfile: Dockerfile
+  #   container_name: sonora_engine_ui
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - DATABASE_URL=postgresql://${PGUSER}:${PGPASSWORD}@db:5432/${PGDATABASE}
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+
+  # API: FastAPI
+  # api:
+  #   build:
+  #     context: ./apps/api
+  #     dockerfile: Dockerfile
+  #   container_name: sonora_engine_api
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - DATABASE_URL=postgresql://${PGUSER}:${PGPASSWORD}@db:5432/${PGDATABASE}
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy      db:
         condition: service_healthy
 
   # API: FastAPI
