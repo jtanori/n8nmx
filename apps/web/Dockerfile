@@ -1,7 +1,8 @@
 FROM node:20-alpine AS base
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+# Optimización: sin auditoría ni fund, y en modo silencioso
+RUN npm ci --no-audit --no-fund --quiet
 COPY . .
 RUN npm run build
 
