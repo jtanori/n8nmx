@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Trash2 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { useMapEvents } from 'react-leaflet';
 
 // Fix para iconos de Leaflet en Next.js
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -27,7 +28,6 @@ const MapContainer = dynamic(() => import('react-leaflet').then((m) => m.MapCont
 const TileLayer = dynamic(() => import('react-leaflet').then((m) => m.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then((m) => m.Marker), { ssr: false });
 const Circle = dynamic(() => import('react-leaflet').then((m) => m.Circle), { ssr: false });
-const useMapEvents = dynamic(() => import('react-leaflet').then((m) => m.useMapEvents), { ssr: false });
 
 function MapEvents({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
   useMapEvents({
