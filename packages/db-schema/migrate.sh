@@ -17,12 +17,17 @@ done
 echo "Verificando tabla de migraciones..."
 psql "$DB_URL" -c "CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);" >/dev/null
 
-# Iterar explícitamente solo sobre archivos que empiezan con dígitos
-for file in /db-schema/migrations/[0-9]*.sql; do
-    # Extraer el nombre del archivo
+# Usar nullglob para que el patrón se expanda a nada si no hay archivos
+shopt -s nullglob
+files=(packages/db-schema/migrations/[0-9]*.sql)
+
+if [ ${#files[@]} -eq 0 ]; then
+    echo "No se encontraron archivos de migración en packages/db-schema/migrations/"
+    exit 0
+fi
+
+for file in "${files[@]}"; do
     filename=$(basename "$file")
-    
-    # Extraer el número de versión (ej: 001_initial_schema.sql -> 1)
     version=$(echo $filename | cut -d'_' -f1 | sed 's/^0*//')
     
     # Validar que la versión sea un número
@@ -37,7 +42,6 @@ for file in /db-schema/migrations/[0-9]*.sql; do
     
     if [ "$applied" != "1" ]; then
         echo "Aplicando migración: $file..."
-        # Usamos ON_ERROR_STOP=1 para que si falla un comando, el script se detenga
         psql -v ON_ERROR_STOP=1 "$DB_URL" -f "$file"
         if [ $? -eq 0 ]; then
             psql "$DB_URL" -c "INSERT INTO schema_migrations (version) VALUES ($version);"
