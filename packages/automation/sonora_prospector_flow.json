@@ -37,13 +37,30 @@
     },
     {
       "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM sales_logic_mapping;"
+      },
+      "id": "8",
+      "name": "Get Sales Logic",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.2,
+      "position": [540, 450],
+      "credentials": {
+        "postgres": {
+          "id": "TU_ID_DE_CREDENCIAL_POSTGRES",
+          "name": "Sonora_Engine_DB"
+        }
+      }
+    },
+    {
+      "parameters": {
         "url": "https://maps.googleapis.com/maps/api/place/textsearch/json",
         "sendQueryParameters": true,
         "queryParameters": {
           "parameters": [
             {
               "name": "query",
-              "value": "={{ $json.term }} en {{ $json.city_name }}"
+              "value": "={{ $node[\"Get Next Task\"].json.term }} en {{ $node[\"Get Next Task\"].json.city_name }}"
             },
             {
               "name": "key",
@@ -72,7 +89,7 @@
     {
       "parameters": {
         "language": "python",
-        "pythonCode": "output = []\ntask_data = _node[\"Get Next Task\"].json\nterm = task_data.get(\"term\", \"\").lower()\n\nfor item in _input.all():\n    data = item.json\n    score = 0.0\n    suggestions = []\n    \n    # 1. Identificación de Nicho\n    niche = \"General\"\n    if any(word in term for word in [\"aduana\", \"logistica\", \"flete\"]): niche = \"Agencia Aduanal\"\n    elif any(word in term for word in [\"medico\", \"clinica\", \"dental\"]): niche = \"Salud\"\n    elif any(word in term for word in [\"casa\", \"venta\", \"real estate\", \"condo\"]): niche = \"Real Estate\"\n    \n    # 2. Lógica de Triggers de Venta\n    if not data.get('website'):\n        suggestions.append({\n            \"service\": \"AI-WhatsApp Concierge\",\n            \"reason\": \"El negocio no tiene sitio web; un bot de WhatsApp puede capturar leads directamente.\"\n        })\n        \n    rating = float(data.get('rating', 0))\n    reviews = int(data.get('user_ratings_total', 0))\n    if rating >= 4.5 and reviews > 30:\n        score += 0.3\n        suggestions.append({\n            \"service\": \"Review Responder AI\",\n            \"reason\": \"Excelente reputación detectada. Ideal para automatizar respuestas.\"\n        })\n\n    # 3. Consolidación\n    data['task_id'] = task_data['task_id']\n    data['niche_category'] = niche\n    data['relevance_score'] = round(score, 2)\n    data['sales_suggestions'] = suggestions\n    data['is_high_quality'] = score >= 0.6\n    output.append(data)\n\nreturn output"
+        "pythonCode": "import json\n\noutput = []\nrules = _node['Get Sales Logic'].all()\n\nfor item in _input.all():\n    data = item.json\n    suggestions = []\n    score = 0.0\n    \n    # Lógica dinámica basada en sales_logic_mapping\n    for rule in rules:\n        trigger = rule.json['condition_trigger']\n        if trigger == 'no_website' and not data.get('website_url'):\n            suggestions.append({\"service\": rule.json['niche_name'], \"reason\": rule.json['pitch_template']})\n        elif trigger == 'low_reviews' and int(data.get('user_ratings_total', 0)) < 30:\n            suggestions.append({\"service\": rule.json['niche_name'], \"reason\": rule.json['pitch_template']})\n\n    data['sales_suggestions'] = suggestions\n    data['is_high_quality'] = score >= 0.6\n    output.append(data)\n\nreturn output"
       },
       "id": "5",
       "name": "Python Scoring & Audit",
@@ -128,9 +145,10 @@
   ],
   "connections": {
     "Schedule Trigger": { "main": [[ { "node": "Get Next Task", "type": "main", "index": 0 } ]] },
-    "Get Next Task": { "main": [[ { "node": "Google Maps API", "type": "main", "index": 0 } ]] },
+    "Get Next Task": { "main": [[ { "node": "Google Maps API", "type": "main", "index": 0 }, { "node": "Get Sales Logic", "type": "main", "index": 0 } ]] },
     "Google Maps API": { "main": [[ { "node": "Split Results", "type": "main", "index": 0 } ]] },
     "Split Results": { "main": [[ { "node": "Python Scoring & Audit", "type": "main", "index": 0 } ]] },
+    "Get Sales Logic": { "main": [[ { "node": "Python Scoring & Audit", "type": "main", "index": 0 } ]] },
     "Python Scoring & Audit": { "main": [[ { "node": "Upsert Lead", "type": "main", "index": 0 }, { "node": "Mark Task Completed", "type": "main", "index": 0 } ]] }
   }
 }
