@@ -1,6 +1,7 @@
 'use server';
 
 import sql from '@/lib/db';
+import { TransactionSql } from 'postgres';
 
 interface SearchQuery {
   id: string;
@@ -24,7 +25,8 @@ export async function getLeads() {
 
 export async function updateQueuePriority(queries: SearchQuery[]) {
   try {
-    await sql.begin(async sql => {
+    // Usamos una transacción para asegurar que todas las actualizaciones se completen
+    await sql.begin(async (sql: TransactionSql) => {
       for (const query of queries) {
         await sql`
           UPDATE search_queries 
