@@ -1,7 +1,12 @@
 #!/bin/bash
-# Uso: ./migrate.sh <DATABASE_URL>
+# Uso: ./migrate.sh <DATABASE_URL> [--dry-run]
 
 DB_URL=$1
+DRY_RUN=false
+
+if [ "$2" == "--dry-run" ]; then
+    DRY_RUN=true
+fi
 
 if [ -z "$DB_URL" ]; then
   echo "Error: DATABASE_URL no proporcionada."
@@ -30,25 +35,26 @@ for file in "${files[@]}"; do
     filename=$(basename "$file")
     version=$(echo $filename | cut -d'_' -f1 | sed 's/^0*//')
     
-    # Validar que la versión sea un número
     if ! [[ "$version" =~ ^[0-9]+$ ]]; then
         echo "Saltando archivo inválido: $filename"
         continue
     fi
-
-    echo "Verificando migración: $filename (v$version)..."
     
     applied=$(psql "$DB_URL" -tAc "SELECT 1 FROM schema_migrations WHERE version = $version" 2>/dev/null)
     
     if [ "$applied" != "1" ]; then
-        echo "Aplicando migración: $file..."
-        psql -v ON_ERROR_STOP=1 "$DB_URL" -f "$file"
-        if [ $? -eq 0 ]; then
-            psql "$DB_URL" -c "INSERT INTO schema_migrations (version) VALUES ($version);"
-            echo "Migración v$version aplicada con éxito."
+        if [ "$DRY_RUN" = true ]; then
+            echo "[DRY-RUN] Migración pendiente: $filename (v$version)"
         else
-            echo "Fallo en la migración $version. Abortando."
-            exit 1
+            echo "Aplicando migración: $file..."
+            psql -v ON_ERROR_STOP=1 "$DB_URL" -f "$file"
+            if [ $? -eq 0 ]; then
+                psql "$DB_URL" -c "INSERT INTO schema_migrations (version) VALUES ($version);"
+                echo "Migración v$version aplicada con éxito."
+            else
+                echo "Fallo en la migración $version. Abortando."
+                exit 1
+            fi
         fi
     else
         echo "Migración v$version ya aplicada."
