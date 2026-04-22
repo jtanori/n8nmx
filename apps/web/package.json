@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "dotenv -e .env${APP_ENV:+.$APP_ENV} -- next dev",
-    "build": "dotenv -e .env${APP_ENV:+.$APP_ENV} -- next build",
+    "build": "next build",
     "start": "dotenv -e .env${APP_ENV:+.$APP_ENV} -- next start",
     "lint": "next lint",
     "test": "jest --detectOpenHandles",

@@ -4,7 +4,6 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 2. Crear TODAS las tablas sin dependencias de FK primero
 CREATE TABLE IF NOT EXISTS leads (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    search_id UUID,
     google_place_id VARCHAR(255) UNIQUE NOT NULL,
     business_name VARCHAR(255) NOT NULL,
     city VARCHAR(100) NOT NULL,
@@ -27,30 +26,43 @@ CREATE TABLE IF NOT EXISTS sonora_settings (
     report_frequency VARCHAR(50)
 );
 
--- 3. Tablas CON dependencias después
 CREATE TABLE IF NOT EXISTS search_queries (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     term VARCHAR(255) NOT NULL,
     is_executed BOOLEAN DEFAULT FALSE,
     priority_order INTEGER DEFAULT 0,
-    config_id INTEGER REFERENCES sonora_settings(id) ON DELETE SET NULL,
+    config_id INTEGER,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS search_locations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    search_id UUID REFERENCES search_queries(id) ON DELETE CASCADE,
+    search_id UUID,
     city_name VARCHAR(100) NOT NULL,
     lat DECIMAL(9, 6),
     lng DECIMAL(9, 6),
     radius INTEGER
 );
 
--- 4. Añadir la FK de leads de forma idempotente
+-- 3. Añadir columnas de FK
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS search_id UUID;
+
+-- 4. Añadir relaciones de FK mediante ALTER TABLE (Idempotente)
 DO $$ 
 BEGIN
+    -- FK de leads a search_queries
     IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_leads_search') THEN
         ALTER TABLE leads ADD CONSTRAINT fk_leads_search FOREIGN KEY (search_id) REFERENCES search_queries(id) ON DELETE SET NULL;
+    END IF;
+
+    -- FK de search_queries a sonora_settings
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_search_settings') THEN
+        ALTER TABLE search_queries ADD CONSTRAINT fk_search_settings FOREIGN KEY (config_id) REFERENCES sonora_settings(id) ON DELETE SET NULL;
+    END IF;
+
+    -- FK de search_locations a search_queries
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_loc_search') THEN
+        ALTER TABLE search_locations ADD CONSTRAINT fk_loc_search FOREIGN KEY (search_id) REFERENCES search_queries(id) ON DELETE CASCADE;
     END IF;
 END $$;
 
