@@ -5,15 +5,26 @@
 ENV_FILE=${1:-.env}
 
 if [ ! -f "$ENV_FILE" ]; then
-  echo "Error: El archivo $ENV_FILE no existe."
+  echo "Error: El archivo $ENV_FILE no existe en la raíz."
   exit 1
 fi
 
 echo "--- Sonora Prospector Engine: Lanzador de Desarrollo ---"
 echo "Enlazando $ENV_FILE como configuración de desarrollo para Next.js..."
 
-# Crear link simbólico relativo para Next.js
-ln -sf "../$ENV_FILE" apps/web/.env
+# Obtener ruta absoluta del archivo de entorno
+ABS_ENV_PATH="$(pwd)/$ENV_FILE"
+
+# Crear link simbólico absoluto para Next.js
+ln -sf "$ABS_ENV_PATH" apps/web/.env
+
+# Verificar si el enlace se creó correctamente
+if [ -L "apps/web/.env" ]; then
+    echo "Enlace simbólico creado exitosamente."
+else
+    echo "Error: No se pudo crear el enlace simbólico."
+    exit 1
+fi
 
 echo "Iniciando servicios..."
 # Función para limpiar procesos al salir
@@ -22,7 +33,7 @@ cleanup() {
     pkill -P $$
     exit
 }
-trap cleanup SIGINT SIGERR
+trap cleanup SIGINT ERR
 
 # Lanzar API en background
 echo "Lanzando API (FastAPI)..."

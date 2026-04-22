@@ -6,6 +6,7 @@ describe("LeadTable Component", () => {
   it("renders a column for City", () => {
     render(<LeadTable leads={[]} />);
     expect(screen.getByText(/Ciudad/i)).toBeInTheDocument();
+    expect(screen.getByText(/Acciones/i)).toBeInTheDocument();
   });
 
   it("renders lead data correctly", () => {
