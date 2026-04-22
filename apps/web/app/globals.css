@@ -2,23 +2,43 @@
 @plugin "tailwindcss-animate";
 
 @theme {
-  --color-background: oklch(1 0 0);
-  --color-foreground: oklch(0.145 0 0);
-  --color-border: oklch(0.922 0 0);
-  --color-ring: oklch(0.708 0 0);
-  --border: var(--color-border);
-  --ring: var(--color-ring);
-  --radius: 0.5rem;
+  --color-background: #11131b;
+  --color-foreground: #e1e1ee;
+  --color-card: #1d1f28;
+  --color-card-foreground: #e1e1ee;
+  --color-primary: #00f2ff;
+  --color-primary-foreground: #00363a;
+  --color-secondary: #d05bff;
+  --color-secondary-foreground: #480063;
+  --color-muted: #32343e;
+  --color-muted-foreground: #b9cacb;
+  --color-accent: #373942;
+  --color-accent-foreground: #e1e1ee;
+  --color-border: rgba(255, 255, 255, 0.2);
+  --color-input: #32343e;
+  --color-ring: #00dbe7;
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased font-sans;
   }
-  html {
-    @apply font-sans;
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/4 backdrop-blur-[12px] border border-white/20;
+  }
+  .glass-panel-active {
+    @apply bg-white/8 backdrop-blur-[24px] border border-white/20 shadow-[0_0_15px_rgba(0,242,255,0.1)];
+  }
+  .glow-button {
+    @apply shadow-[0_0_15px_rgba(0,242,255,0.3)] hover:shadow-[0_0_25px_rgba(0,242,255,0.5)];
+  }
+  .neon-text-glow {
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
   }
 }
