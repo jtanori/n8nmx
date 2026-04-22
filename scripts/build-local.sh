@@ -9,11 +9,15 @@ if [ ! -f "$ENV_FILE" ]; then
   exit 1
 fi
 
-echo "--- Sonora Prospector Engine: Preparador de Build Local ---"
+echo "--- Sonora Prospector Engine: Preparando entorno ---"
 
-# Cargar variables de entorno
+# 1. Asegurar que apps/web tenga acceso al .env
+# Copiamos explícitamente para que el build de Next.js lo encuentre donde espera
+cp "$ENV_FILE" apps/web/.env
+
+# 2. Cargar variables para el build
 export $(grep -v '^#' "$ENV_FILE" | xargs)
 
-# Ejecutar build
+# 3. Ejecutar build
 echo "Iniciando build de producción..."
 cd apps/web && npm run build
