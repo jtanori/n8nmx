@@ -1,43 +1,40 @@
 'use server';
 
 import sql from '@/lib/db';
-import { TransactionSql } from 'postgres';
 
-interface SearchQuery {
-  id: string;
-  priority_order: number;
+interface Location {
+  city_name: string;
+  lat: number;
+  lng: number;
+  radius: number;
 }
 
-export async function getLeads() {
-  try {
-    const leads = await sql`
-      SELECT id, business_name, city, relevance_score, is_high_quality, sales_suggestions 
-      FROM leads 
-      ORDER BY created_at DESC 
-      LIMIT 50
-    `;
-    return leads;
-  } catch (error) {
-    console.error('Database Error:', error);
-    return [];
-  }
+interface SearchData {
+  term: string;
+  locations: Location[];
 }
 
-export async function updateQueuePriority(queries: SearchQuery[]) {
+export async function createRegionalSearch(searchData: SearchData) {
   try {
-    // Usamos una transacción para asegurar que todas las actualizaciones se completen
-    await sql.begin(async (sql: TransactionSql) => {
-      for (const query of queries) {
+    await sql.begin(async (sql) => {
+      // 1. Insertar la búsqueda
+      const [searchQuery] = await sql`
+        INSERT INTO search_queries (term, is_executed)
+        VALUES (${searchData.term}, FALSE)
+        RETURNING id
+      `;
+
+      // 2. Insertar ubicaciones
+      for (const loc of searchData.locations) {
         await sql`
-          UPDATE search_queries 
-          SET priority_order = ${query.priority_order} 
-          WHERE id = ${query.id}
+          INSERT INTO search_locations (search_id, city_name, lat, lng, radius)
+          VALUES (${searchQuery.id}, ${loc.city_name}, ${loc.lat}, ${loc.lng}, ${loc.radius})
         `;
       }
     });
     return { success: true };
   } catch (error) {
-    console.error('Error updating queue priority:', error);
-    return { success: false, error: 'Error al actualizar el orden de prioridad' };
+    console.error('Error creating regional search:', error);
+    return { success: false, error: 'Error al crear la búsqueda' };
   }
 }
