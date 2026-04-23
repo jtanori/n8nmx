@@ -1,21 +1,19 @@
 import { render, screen } from "@testing-library/react";
-import RootLayout from "../app/layout";
+import { Sidebar } from "../components/layout/Sidebar";
+import { Navbar } from "../components/layout/Navbar";
 import "@testing-library/jest-dom";
 
-// Mock del children para el layout
-const MockChildren = () => <div>Dashboard Content</div>;
+describe("Layout - Global UI Components", () => {
+  it("renders all required navigation items in Sidebar", () => {
+    render(<Sidebar />);
+    const navItems = ['Dashboard', 'Searches', 'Leads', 'Map View', 'AI Auditor', 'Settings', 'Account'];
+    navItems.forEach(item => {
+      expect(screen.getByText(item)).toBeInTheDocument();
+    });
+  });
 
-describe("Global Layout Integration", () => {
-  it("renders Sidebar and Navbar within the layout", () => {
-    render(
-      <RootLayout>
-        <MockChildren />
-      </RootLayout>
-    );
-    
-    // Verificamos que los componentes principales estén presentes
-    expect(screen.getByText(/Sonora Engine/i)).toBeInTheDocument();
+  it("renders the primary CTA in Navbar", () => {
+    render(<Navbar />);
     expect(screen.getByText(/Start New Regional Search/i)).toBeInTheDocument();
-    expect(screen.getByText("Dashboard Content")).toBeInTheDocument();
   });
 });
