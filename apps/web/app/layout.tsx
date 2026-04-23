@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Navbar } from "@/components/layout/Navbar";
+import { SearchBuilderDialog } from "@/components/dashboard/SearchBuilderDialog";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </main>
         </div>
+        <SearchBuilderDialog />
       </body>
     </html>
   );
