@@ -11,7 +11,7 @@ interface Suggestion {
 export const SalesStrategyPanel = ({ suggestions }: { suggestions: Suggestion[] }) => {
   if (!suggestions || suggestions.length === 0) {
     return (
-      <Card>
+      <Card className="glass-panel">
         <CardContent className="pt-6 text-center text-muted-foreground">
           No hay sugerencias de venta disponibles para este lead.
         </CardContent>
@@ -25,14 +25,14 @@ export const SalesStrategyPanel = ({ suggestions }: { suggestions: Suggestion[] 
         <Target className="w-5 h-5 text-primary" /> Oportunidades Detectadas
       </h3>
       {suggestions.map((s, idx) => (
-        <Card key={idx}>
+        <Card key={idx} className="glass-panel border-cyan-400/20">
           <CardHeader className="pb-2">
-            <CardTitle className="text-md flex items-center gap-2">
+            <CardTitle className="text-md flex items-center gap-2 text-primary">
               <Zap className="w-4 h-4 text-yellow-500" /> {s.service}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <CardDescription>{s.reason}</CardDescription>
+            <CardDescription className="text-foreground">{s.reason}</CardDescription>
           </CardContent>
         </Card>
       ))}
