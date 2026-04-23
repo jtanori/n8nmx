@@ -14,6 +14,21 @@ interface SearchData {
   locations: Location[];
 }
 
+export async function getLeads() {
+  try {
+    const leads = await sql`
+      SELECT id, business_name, city, relevance_score, is_high_quality, sales_suggestions 
+      FROM leads 
+      ORDER BY created_at DESC 
+      LIMIT 50
+    `;
+    return leads;
+  } catch (error) {
+    console.error('Database Error:', error);
+    return [];
+  }
+}
+
 export async function createRegionalSearch(searchData: SearchData) {
   try {
     await sql.begin(async (sql) => {
